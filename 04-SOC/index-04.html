@@ -33,13 +33,16 @@
 			this.da = 0;
 			this.tax = 0;
 			this.salary = 0;
-			this.educationCess = 0;
+			
+			this.onSalaryChange = null;
 		}
 		//behavior
 		SalaryCalculatorModel.prototype.calculate = function() {
 			var gross = this.basic + this.hra + this.da;
 			var net = gross * ((100-this.tax)/100);
 			this.salary = net;
+			if (typeof this.onSalaryChange === 'function')
+				this.onSalaryChange(this.salary);
 		};
 
 
@@ -73,9 +76,13 @@
 				$('#tdHra').html(model.hra);
 				$('#tdDa').html(model.da);
 				$('#tdTax').html(model.tax);
+
 				
-				$('#tdSalary').html(model.salary);
 			});
+
+			model.onSalaryChange = function(value){
+				$('#tdSalary').html(value);
+			};
 		});
 	</script>
 </head>
