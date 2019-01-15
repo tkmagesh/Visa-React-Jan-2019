@@ -19,6 +19,7 @@
 		}
 	</style>
 	<script src="jquery-3.3.1.js"></script>
+	<script src="handlebars.js"></script>
 	<script>
 		String.prototype.toInt = function() {
 			return parseInt(this, 10);
@@ -31,22 +32,16 @@
 			var _data = {
 				basic : 0,
 				hra : 0,
-				das : 0,
+				da : 0,
 				tax : 0,
 				salary : 0
 			};
 
-			var _subscribers = {
-				basic : [],
-				hra : [],
-				da : [],
-				tax : [],
-				salary : []
-			};
+			var _subscribers = [];
 
-			this.subscribe = function(attrName, subscriptionFn){
+			this.subscribe = function(subscriptionFn){
 				if (typeof subscriptionFn === 'function')
-					_subscribers[attrName].push(subscriptionFn);
+					_subscribers.push(subscriptionFn);
 			}
 
 			this.get = function(attrName){
@@ -59,12 +54,21 @@
 				tiggerChange(attrName, value)
 			}
 
-			function tiggerChange(attrName, value){
-				var _subscriptionFns = _subscribers[attrName];
-				_subscriptionFns.forEach(function(_subscriptionFn){
+			function tiggerChange(){
+				_subscribers.forEach(function(_subscriptionFn){
 					if (typeof _subscriptionFn === 'function')
-						_subscriptionFn(value);
+						_subscriptionFn();
 				});
+			}
+
+			this.toJSON = function(){
+				return {
+					basic : _data.basic,
+					hra : _data.hra,
+					da : _data.da,
+					tax : _data.tax,
+					salary : _data.salary
+				};
 			}
 		}
 		//behavior
@@ -83,19 +87,19 @@
 			var templateHtml = `
 				<div class="field">
 					<label for="">Basic :</label>
-					<input type="number" name="" id="txtBasic">
+					<input type="number" name="" id="txtBasic" value="{{basic}}">
 				</div>
 				<div class="field">
 					<label for="">HRA :</label>
-					<input type="number" name="" id="txtHra">
+					<input type="number" name="" id="txtHra" value="{{hra}}">
 				</div>
 				<div class="field">
 					<label for="">DA :</label>
-					<input type="number" name="" id="txtDa">
+					<input type="number" name="" id="txtDa" value="{{da}}">
 				</div>
 				<div class="field">
 					<label for="">Tax :</label>
-					<input type="range" name="" id="rangeTax" min="0" max="30" value="0">
+					<input type="range" name="" id="rangeTax" min="0" max="30" value="{{tax}}">
 				</div>
 				<div class="field">
 					<input type="button" value="Calculate" id="btnCalculate">
@@ -104,21 +108,27 @@
 					<table>
 						<tbody>
 							<tr>
-								<td id="tdBasic">[Basic]</td>
-								<td id="tdHra">[Hra]</td>
-								<td id="tdDa">[Da]</td>
-								<td id="tdTax">[Tax]</td>
-								<td id="tdSalary">[Salary]</td>
+								<td id="tdBasic">{{basic}}</td>
+								<td id="tdHra">{{hra}}</td>
+								<td id="tdDa">{{da}}</td>
+								<td id="tdTax">{{tax}}</td>
+								<td id="tdSalary">{{salary}}</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
-			`
+			`;
+
 			var $root = this.$root = $('<div></div>');
 
+			var templateFn = Handlebars.compile(templateHtml);
+
 			this.render = function(){
-				$root.html(templateHtml);
-			}
+				var data = model.toJSON();
+				var newHTML = templateFn(data);
+				console.log(data);
+				$root.html(newHTML);
+			};
 
 			//UI Behavior
 			//Reacting to user actions
@@ -144,44 +154,8 @@
 
 
 			//Reacting to model changes
-			model.subscribe('salary', function(value){
-				$('#tdSalary', $root).html(value);
-			});
-
-			model.subscribe('basic', function(value){
-				$('#tdBasic', $root).html(value);
-			});
-
-			model.subscribe('hra', function(value){
-				$('#tdHra', $root).html(value);
-			});
-
-			model.subscribe('da', function(value){
-				$('#tdDa', $root).html(value);
-			});
-
-			model.subscribe('tax', function(value){
-				$('#tdTax', $root).html(value);
-			});
-		
-		/*$(function(){
-			window['model'] = new SalaryCalculatorModel();
-
-			var view1 = new SalaryCalculator(model)
-			var view2 = new SalaryCalculator(model)
-			
-			view1.$root.appendTo(document.body)
-			view2.$root.appendTo(document.body)
-			
-			view1.render()
-			view2.render()
-			
-			model.set('da', 10000)
-			model.set('tax', 10)
-			
-			model.calculate()
-			
-		});*/
+			model.subscribe(this.render);
+		}
 	</script>
 </head>
 <body>
