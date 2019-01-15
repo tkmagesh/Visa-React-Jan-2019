@@ -37,16 +37,16 @@
 			};
 
 			var _subscribers = {
-				basic : null,
-				hra : null,
-				das : null,
-				tax : null,
-				salary : null
+				basic : [],
+				hra : [],
+				da : [],
+				tax : [],
+				salary : []
 			};
 
 			this.subscribe = function(attrName, subscriptionFn){
 				if (typeof subscriptionFn === 'function')
-					_subscribers[attrName] = subscriptionFn;
+					_subscribers[attrName].push(subscriptionFn);
 			}
 
 			this.get = function(attrName){
@@ -60,9 +60,11 @@
 			}
 
 			function tiggerChange(attrName, value){
-				var _subscriptionFn = _subscribers[attrName];
-				if (typeof _subscriptionFn === 'function')
-					_subscriptionFn(value);
+				var _subscriptionFns = _subscribers[attrName];
+				_subscriptionFns.forEach(function(_subscriptionFn){
+					if (typeof _subscriptionFn === 'function')
+						_subscriptionFn(value);
+				});
 			}
 		}
 		//behavior
