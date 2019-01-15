@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Salary Calculator</title>
+	<style>
+		body{
+			margin-left: 50px;
+		}
+		.field{
+			margin-bottom: 10px;
+		}
+		label{
+			display: block;
+		}
+		td{
+			padding: 10px;
+			font-size: 18pt;
+		}
+	</style>
+	<script src="jquery-3.3.1.js"></script>
+	<script>
+		String.prototype.toInt = function() {
+			return parseInt(this, 10);
+		};
+
+		//Model
+		//state & behavior
+		function SalaryCalculatorModel(){
+			//state
+			var _data = {
+				basic : 0,
+				hra : 0,
+				das : 0,
+				tax : 0,
+				salary : 0
+			};
+
+			var _subscribers = {
+				basic : [],
+				hra : [],
+				da : [],
+				tax : [],
+				salary : []
+			};
+
+			this.subscribe = function(attrName, subscriptionFn){
+				if (typeof subscriptionFn === 'function')
+					_subscribers[attrName].push(subscriptionFn);
+			}
+
+			this.get = function(attrName){
+				return _data[attrName];
+			}
+			
+			this.set = function(attrName, value){
+				if (_data[attrName] === value) return;
+				_data[attrName] = value;
+				tiggerChange(attrName, value)
+			}
+
+			function tiggerChange(attrName, value){
+				var _subscriptionFns = _subscribers[attrName];
+				_subscriptionFns.forEach(function(_subscriptionFn){
+					if (typeof _subscriptionFn === 'function')
+						_subscriptionFn(value);
+				});
+			}
+		}
+		//behavior
+		SalaryCalculatorModel.prototype.calculate = function() {
+			var gross = this.get('basic') + this.get('hra') + this.get('da');
+			var net = gross * ((100-this.get('tax'))/100);
+			this.set('salary', net);
+		};
+
+
+		//View
+
+		function SalaryCalculator(model){
+
+			//Presentation
+			var templateHtml = `
+				<div class="field">
+					<label for="">Basic :</label>
+					<input type="number" name="" id="txtBasic">
+				</div>
+				<div class="field">
+					<label for="">HRA :</label>
+					<input type="number" name="" id="txtHra">
+				</div>
+				<div class="field">
+					<label for="">DA :</label>
+					<input type="number" name="" id="txtDa">
+				</div>
+				<div class="field">
+					<label for="">Tax :</label>
+					<input type="range" name="" id="rangeTax" min="0" max="30" value="0">
+				</div>
+				<div class="field">
+					<input type="button" value="Calculate" id="btnCalculate">
+				</div>
+				<div class="field">
+					<table>
+						<tbody>
+							<tr>
+								<td id="tdBasic">[Basic]</td>
+								<td id="tdHra">[Hra]</td>
+								<td id="tdDa">[Da]</td>
+								<td id="tdTax">[Tax]</td>
+								<td id="tdSalary">[Salary]</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			`
+			var $root = this.$root = $('<div></div>');
+
+			this.render = function(){
+				$root.html(templateHtml);
+			}
+
+			//UI Behavior
+			//Reacting to user actions
+			$root.on('change','#txtBasic', function(){
+				model.set('basic', $(this).val().toInt());
+			});
+
+			$root.on('change','#txtHra', function(){
+				model.set('hra', $(this).val().toInt());
+			});
+
+			$root.on('change','#txtDa', function(){
+				model.set('da', $(this).val().toInt());
+			});
+
+			$root.on('change','#rangeTax', function(){
+				model.set('tax', $(this).val().toInt());
+			});
+
+			$root.on('click','#btnCalculate', function(){
+				model.calculate();				
+			});
+
+
+			//Reacting to model changes
+			model.subscribe('salary', function(value){
+				$('#tdSalary', $root).html(value);
+			});
+
+			model.subscribe('basic', function(value){
+				$('#tdBasic', $root).html(value);
+			});
+
+			model.subscribe('hra', function(value){
+				$('#tdHra', $root).html(value);
+			});
+
+			model.subscribe('da', function(value){
+				$('#tdDa', $root).html(value);
+			});
+
+			model.subscribe('tax', function(value){
+				$('#tdTax', $root).html(value);
+			});
+		}
+		/*$(function(){
+			window['model'] = new SalaryCalculatorModel();
+
+			var view1 = new SalaryCalculator(model)
+			var view2 = new SalaryCalculator(model)
+			
+			view1.$root.appendTo(document.body)
+			view2.$root.appendTo(document.body)
+			
+			view1.render()
+			view2.render()
+			
+			model.set('da', 10000)
+			model.set('tax', 10)
+			
+			model.calculate()
+			
+		});*/
+	</script>
+</head>
+<body>
+	<h1>Salary Calculator</h1>
+	<hr>
+	
+</body>
+</html>
