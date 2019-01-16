@@ -17,6 +17,12 @@
 			padding: 10px;
 			font-size: 18pt;
 		}
+		.poorSalary{
+			color : red;
+		}
+		.goodSalary{
+			color : green
+		}
 	</style>
 	<script src="react.development.js"></script>
 	<script src="react-dom.development.js"></script>
@@ -93,20 +99,32 @@
 						<div className="field">
 							<input type="button" value="Calculate" onClick= { evt => model.calculate() } />
 						</div>
-						<div className="field">
-							<table>
-								<tbody>
-									<tr>
-										<td id="tdBasic">{data.basic}</td>
-										<td id="tdHra">{data.hra}</td>
-										<td id="tdDa">{data.da}</td>
-										<td id="tdTax">{data.tax}</td>
-										<td id="tdSalary">{data.salary}</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
+						<SalaryCalculatorResult {...data}/>
 					</section>
+				)
+			}
+		}
+
+		class SalaryCalculatorResult extends React.Component{
+			render(){
+				let { basic, hra, da, tax, salary } = this.props;
+				let salaryEle = salary < 10000 ? (<td className="poorSalary">{salary}</td>) : (<td className="goodSalary">{salary}</td>);
+				salaryEle = salary > 0 ? salaryEle : null;
+				
+				return(
+					<div className="field">
+						<table>
+							<tbody>
+								<tr>
+									<td>{basic}</td>
+									<td>{hra}</td>
+									<td>{da}</td>
+									<td>{tax}</td>
+									{salaryEle}
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				)
 			}
 		}
