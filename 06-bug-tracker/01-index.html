@@ -80,6 +80,21 @@
 			}
 		}
 
+		class BugItem extends React.Component{
+			onBugNameClick = () => {
+				console.log(this.props.bug);
+			}
+			render(){
+				let { bug } = this.props;
+				return(
+					<li>
+						<span className="bugname" onClick={this.onBugNameClick}>
+							{JSON.stringify(bug)}
+						</span>
+					</li>	
+				);
+			}
+		}
 		class BugTracker extends React.Component{
 			state = { 
 				newBugName : ''
@@ -89,13 +104,13 @@
 				this.props.bugsCollection.addNew(this.state.newBugName);
 				this.setState({newBugName : ''});
 			}
+
+			
 			render(){
 				let { bugsCollection } = this.props,
 					bugs = bugsCollection.getAll(),
 					bugItems = bugs.map((bug, index) => (
-						<li key={index}>
-							<span className="bugname">{JSON.stringify(bug)}</span>
-						</li>	
+						<BugItem key={index} bug={bug} />
 					));
 				return(
 					<div>
