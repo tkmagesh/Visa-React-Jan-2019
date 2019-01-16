@@ -25,11 +25,10 @@
 			}
 
 			onBtnGreetClick = (evt) => {
-				this.setState({greetMsg : `Hi ${this.state.userName}, Have a nice day!`});
+				this.setState({greetMsg : `Hi ${this.state.userName}, ${this.props.msg}`});
 			}
 
 			render(){
-				console.log('rendered');
 				return (
 					<div>
 						<h1>Greeter</h1>
@@ -44,7 +43,8 @@
 			}
 		}
 
-		ReactDOM.render(<Greeter/>,
+		let msgTemplate = 'Have a good day!';
+		ReactDOM.render(<Greeter msg={msgTemplate}/>,
 			document.getElementById('root'));
 	</script>
 </head>
