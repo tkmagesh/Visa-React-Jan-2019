@@ -22,38 +22,86 @@
 	<script src="react-dom.development.js"></script>
 	<script src="babel.min.js"></script>
 	<script type="text/babel">
+
+		class EventEmitter{
+			_subscribers = [];
+
+			subscribe(listenerFn){
+				this._subscribers.push(listenerFn);
+			}
+
+			triggerChange(){
+				this._subscribers.forEach(listenerFn => listenerFn());
+			}
+		}
+
+		class SalaryCalculatorModel extends EventEmitter{
+			constructor(){
+				super();
+			}
+
+			_data = {
+				basic : 0,
+				hra : 0,
+				da : 0,
+				tax : 0,
+				salary : 0
+			}
+
+			get(attrName){
+				return this._data[attrName];
+			}
+			set(attrName, value){
+				if (this._data[attrName] === value) return;
+				this._data[attrName] = value;
+				this.triggerChange();
+			}
+
+			calculate(){
+				let gross = this.get('basic') + this.get('hra') + this.get('da');
+				let net = gross * ((100-this.get('tax')) /100);
+				this.set('salary', net);
+			}
+
+			toJSON(){
+				return { ...this._data };
+			}
+		}
+
 		class SalaryCalculator extends React.Component{
 			render(){
+				let { model } = this.props,
+					data = model.toJSON();
 				return(
 					<section>
-						<div class="field">
-							<label for="">Basic :</label>
-							<input type="number" name="" id="txtBasic">
+						<div className="field">
+							<label htmlFor="">Basic :</label>
+							<input type="number" defaultValue={model.get('basic')} onChange={ evt => model.set('basic', evt.target.valueAsNumber) }/>
 						</div>
-						<div class="field">
-							<label for="">HRA :</label>
-							<input type="number" name="" id="txtHra">
+						<div className="field">
+							<label htmlFor="">HRA :</label>
+							<input type="number" onChange={ evt => model.set('hra', evt.target.valueAsNumber) }/>
 						</div>
-						<div class="field">
-							<label for="">DA :</label>
-							<input type="number" name="" id="txtDa">
+						<div className="field">
+							<label htmlFor="">DA :</label>
+							<input type="number" onChange={ evt => model.set('da', evt.target.valueAsNumber) }/>
 						</div>
-						<div class="field">
-							<label for="">Tax :</label>
-							<input type="range" name="" id="rangeTax" min="0" max="30">
+						<div className="field">
+							<label htmlFor="">Tax :</label>
+							<input type="range" min="0" max="30" defaultValue="0" onChange={ evt => model.set('tax', evt.target.valueAsNumber) }/>
 						</div>
-						<div class="field">
-							<input type="button" value="Calculate" id="btnCalculate">
+						<div className="field">
+							<input type="button" value="Calculate" onClick= { evt => model.calculate() } />
 						</div>
-						<div class="field">
+						<div className="field">
 							<table>
 								<tbody>
 									<tr>
-										<td id="tdBasic">[basic]</td>
-										<td id="tdHra">[hra]</td>
-										<td id="tdDa">[da]</td>
-										<td id="tdTax">[tax]</td>
-										<td id="tdSalary">[salary]</td>
+										<td id="tdBasic">{data.basic}</td>
+										<td id="tdHra">{data.hra}</td>
+										<td id="tdDa">{data.da}</td>
+										<td id="tdTax">{data.tax}</td>
+										<td id="tdSalary">{data.salary}</td>
 									</tr>
 								</tbody>
 							</table>
@@ -62,9 +110,21 @@
 				)
 			}
 		}
+
+		let model = new SalaryCalculatorModel();
+		model.set('basic', 10000);
+
+		function renderCalculator(){
+			ReactDOM.render(<SalaryCalculator model={model} />,
+				document.getElementById('root'));
+		}
+		renderCalculator();
+		model.subscribe(renderCalculator);
 	</script>
 </head>
 <body>
+	<h1>Salary Calculator</h1>
+	<hr/>
 	<div id="root"></div>
 </body>
 </html>
