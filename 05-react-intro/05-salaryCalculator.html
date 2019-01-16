@@ -80,22 +80,10 @@
 					data = model.toJSON();
 				return(
 					<section>
-						<div className="field">
-							<label htmlFor="">Basic :</label>
-							<input type="number" defaultValue={model.get('basic')} onChange={ evt => model.set('basic', evt.target.valueAsNumber) }/>
-						</div>
-						<div className="field">
-							<label htmlFor="">HRA :</label>
-							<input type="number" onChange={ evt => model.set('hra', evt.target.valueAsNumber) }/>
-						</div>
-						<div className="field">
-							<label htmlFor="">DA :</label>
-							<input type="number" onChange={ evt => model.set('da', evt.target.valueAsNumber) }/>
-						</div>
-						<div className="field">
-							<label htmlFor="">Tax :</label>
-							<input type="range" min="0" max="30" defaultValue="0" onChange={ evt => model.set('tax', evt.target.valueAsNumber) }/>
-						</div>
+						<SalaryCalculatorInput labelText="Basic :" onValueChange={ value => model.set('basic', value)} />
+						<SalaryCalculatorInput labelText="HRA :" onValueChange={ value => model.set('hra', value)} />
+						<SalaryCalculatorInput labelText="DA :" onValueChange={ value => model.set('da', value)} />
+						<SalaryCalculatorInput labelText="Tax :" onValueChange={ value => model.set('tax', value)} type="range" min="0" max="30" defaultValue="0" />
 						<div className="field">
 							<input type="button" value="Calculate" onClick= { evt => model.calculate() } />
 						</div>
@@ -105,12 +93,24 @@
 			}
 		}
 
+		class SalaryCalculatorInput extends React.Component{
+			render(){
+				let { labelText, onValueChange, type = 'number' , ...attrs } = this.props;
+				return(
+					<div className="field">
+						<label htmlFor="">{labelText}</label>
+						<input type={type} {...attrs} onChange={ evt => onValueChange(evt.target.valueAsNumber) }/>
+					</div>
+				)
+			}
+		}
+
 		class SalaryCalculatorResult extends React.Component{
 			render(){
 				let { basic, hra, da, tax, salary } = this.props;
 				let salaryEle = salary < 10000 ? (<td className="poorSalary">{salary}</td>) : (<td className="goodSalary">{salary}</td>);
 				salaryEle = salary > 0 ? salaryEle : null;
-				
+
 				return(
 					<div className="field">
 						<table>
