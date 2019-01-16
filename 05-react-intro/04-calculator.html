@@ -2,21 +2,82 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Calculatoe</title>
+	<title>Calculator</title>
+	<script src="react.development.js"></script>
+	<script src="react-dom.development.js"></script>
+	<script src="babel.min.js"></script>
+	<script type="text/babel">
+		class CalculatorModel{
+			n1 = 0;
+			n2 = 0;
+			result = 0;
+
+			_subscribers = [];
+
+			subscribe(listenerFn){
+				this._subscribers.push(listenerFn);
+			}
+
+			triggerChange(){
+				this._subscribers.forEach(listenerFn => listenerFn());
+			}
+
+			add(){
+				this.result = this.n1 + this.n2;
+				this.triggerChange();
+			}
+
+			subtract(){
+				this.result = this.n1 - this.n2;
+				this.triggerChange();
+			}
+
+			multiply(){
+				this.result = this.n1 * this.n2;
+				this.triggerChange();
+			}
+
+			divide(){
+				this.result = this.n1 / this.n2;
+				this.triggerChange();
+			}
+		}
+		class Calculator extends React.Component{
+			onN1Change = (evt) => {
+				this.props.model.n1 = evt.target.valueAsNumber
+			}
+			render(){
+				let { model } = this.props;
+				return(
+					<div>
+						<h1>Calculator</h1>
+						<hr/>
+						<input type="number" onChange={this.onN1Change}/>
+						<input type="number" onChange={ evt => model.n2 = evt.target.valueAsNumber}/>
+						<input type="button" value="Add" onClick={ () => model.add() }/>
+						<input type="button" value="Subtract" onClick={ () => model.subtract() }/>
+						<input type="button" value="Multiply" onClick={ () => model.multiply() }/>
+						<input type="button" value="Divide" onClick={ () => model.divide() }/>
+						<div>{model.result}</div>
+					</div>
+				)
+			}
+		}
+		let model = new CalculatorModel();
+
+		function renderCalculator(){
+			ReactDOM.render(<Calculator model={model}/>,
+				document.getElementById('root'));
+		}
+		renderCalculator();
+		model.subscribe(renderCalculator);
+		
+	</script>
 </head>
 <body>
 	<div id="root">
-		<h1>Calculator</h1>
-		<div>
-			<hr>
-			<input type="number">
-			<input type="number">
-			<input type="button" value="Add">
-			<input type="button" value="Subtract">
-			<input type="button" value="Multiply">
-			<input type="button" value="Divide">
-			<div>[Result]</div>
-		</div>
+		
+		
 	</div>
 </body>
 </html>
