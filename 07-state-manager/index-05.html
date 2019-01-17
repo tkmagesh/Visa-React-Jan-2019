@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>State Manager</title>
+	<script src="stateManager.js"></script>
+	<script src="react.development.js"></script>
+	<script src="react-dom.development.js"></script>
+	<script src="babel.min.js"></script>
+	<script type="text/babel">
+
+		function spinnerReducer(currentState = 0, action){
+			if (action.type === 'UP') return ++currentState;
+			if (action.type === 'DOWN') return --currentState;
+			return currentState;
+		}
+
+		let store = SM.createStore(spinnerReducer);
+
+		let spinnerActionCreators = {
+			down(){
+				let action = { type : 'DOWN' };
+				return action;
+			},
+			up(){
+				let action = { type : 'UP' };
+				return action;
+			}
+		}
+
+		function bindActionCreators(actionCreators, dispatch){
+			return {
+				down(){
+					let action = actionCreators.down();
+					dispatch(action);
+				},
+				up(){
+					let action = actionCreators.up();
+					dispatch(action);
+				}
+			}
+		}
+
+		class Spinner extends React.Component{
+			onDownClick = () => {
+				this.props.actions.down();
+			}
+			onUpClick = () => {
+				this.props.actions.up();
+			}
+			render(){
+				let { value } = this.props;
+				return(
+					<div>
+						<input type="button" value="Down" onClick={this.onDownClick}/>
+						<span> [ {value} ] </span>
+						<input type="button" value="Up"  onClick={this.onUpClick}/>
+					</div>
+				)
+			}
+		}
+
+		let spinnerActions = bindActionCreators(spinnerActionCreators, store.dispatch);
+
+		function renderApp(){
+			let value = store.getState(),
+				dispatch = store.dispatch;
+
+			ReactDOM.render(<Spinner value={value} actions={spinnerActions}/>,
+				document.getElementById('root'));
+		}
+		renderApp();
+		store.subscribe(renderApp);
+	</script>
+</head>
+<body>
+	<div id="root">
+		
+	</div>
+</body>
+</html>
