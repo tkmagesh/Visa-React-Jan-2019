@@ -63,14 +63,26 @@
 			}
 		}
 
+		class Bug{
+			name = '';
+			isClosed = false;
+
+			constructor(name, isClosed = false){
+				this.name = name;
+				this.isClosed = isClosed;
+			}
+
+			toggle(){
+				this.isClosed = !this.isClosed;
+			}
+		}
+
+
 		class BugsCollectionModel extends EventEmitter{
 			_bugs = [];
 
 			addNew(bugName){
-				let newBug = {
-					name : bugName,
-					isClosed : false
-				};
+				let newBug = new Bug(bugName);
 				this._bugs.push(newBug);
 				this.triggerChange();
 			}
@@ -78,11 +90,19 @@
 			getAll(){
 				return [...this._bugs];
 			}
+
+			/*toggle(bugToToggle){
+				bugToToggle.isClosed = !bugToToggle.isClosed;
+				this.triggerChange();
+			}*/
 		}
 
 		class BugItem extends React.Component{
+			state = { dummy : true };
+
 			onBugNameClick = () => {
-				console.log(this.props.bug);
+				this.props.bug.toggle();
+				this.setState({dummy : !this.state.dummy});
 			}
 			render(){
 				let { bug } = this.props;
@@ -93,6 +113,23 @@
 						</span>
 					</li>	
 				);
+			}
+		}
+
+		class BugList extends React.Component{
+			
+			render(){
+				let bugItems = this.props.bugs.map((bug, index) => (
+					<BugItem key={index} bug={bug}/>
+				));
+				return(
+					<section className="list">
+						<ol>
+							{bugItems}
+						</ol>
+						<input type="button" value="Remove Closed" />
+					</section>
+				)
 			}
 		}
 		class BugTracker extends React.Component{
@@ -109,13 +146,12 @@
 			render(){
 				let { bugsCollection } = this.props,
 					bugs = bugsCollection.getAll(),
-					bugItems = bugs.map((bug, index) => (
-						<BugItem key={index} bug={bug} />
-					));
+					closedCount = bugs.reduce((result, bug) => bug.isClosed ? ++result : result, 0);
+					
 				return(
 					<div>
 						<section className="stats">
-							<span className="closed">1</span>
+							<span className="closed">{closedCount}</span>
 							<span> / </span>
 							<span>{bugs.length}</span>
 						</section>
@@ -133,12 +169,7 @@
 							<input type="text" value={this.state.newBugName} onChange={evt => this.setState({newBugName : evt.target.value})}/>
 							<input type="button" value="Add New" onClick={this.onAddNewClick} />
 						</section>
-						<section className="list">
-							<ol>
-								{bugItems}
-							</ol>
-							<input type="button" value="Remove Closed" />
-						</section>
+						<BugList bugs={bugs} />
 					</div>
 				)
 			}
