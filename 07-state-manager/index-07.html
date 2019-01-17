@@ -13,6 +13,7 @@
 			if (action.type === 'UP') return ++currentState;
 			if (action.type === 'DOWN') return --currentState;
 			if (action.type === 'DOUBLE_UP') return currentState * 2;
+			if (action.type === 'DOUBLE_DOWN') return currentState / 2;
 			return currentState;
 		}
 
@@ -28,22 +29,24 @@
 				return action;
 			},
 			doubleUp(){
-				return action = { type : 'DOUBLE_UP'};
+				let action = { type : 'DOUBLE_UP'};
+				return action;
+			},
+			doubleDown(){
+				let action = { type : 'DOUBLE_DOWN'};
 				return action;
 			}
 		}
 
 		function bindActionCreators(actionCreators, dispatch){
-			return {
-				down(){
-					let action = actionCreators.down();
-					dispatch(action);
-				},
-				up(){
-					let action = actionCreators.up();
+			let result = {};
+			for(let key in actionCreators){
+				result[key] = function(){
+					let action = actionCreators[key].apply(undefined, arguments);
 					dispatch(action);
 				}
 			}
+			return result;
 		}
 
 		class Spinner extends React.Component{
@@ -56,10 +59,14 @@
 			onDoubleUpClick = () => {
 				this.props.doubleUp();
 			}
+			onDoubleDownClick = () => {
+				this.props.doubleDown();
+			}
 			render(){
 				let { value } = this.props;
 				return(
 					<div>
+						<input type="button" value="Double Down" onClick={this.onDoubleDownClick} />
 						<input type="button" value="Down" onClick={this.onDownClick}/>
 						<span> [ {value} ] </span>
 						<input type="button" value="Up"  onClick={this.onUpClick}/>
