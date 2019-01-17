@@ -59,12 +59,34 @@
 				let newBug = { name : bugName, isClosed : false};
 				let action = { type : 'ADD_NEW', payload : newBug};
 				return action;
+			},
+			toggle(bugToToggle){
+				let toggledBug = { ...bugToToggle, isClosed : !bugToToggle.isClosed};
+				let action = { type : 'REPLACE', payload : { oldBug : bugToToggle, newBug : toggledBug}};
+				return action;
+			},
+			removeClosed(bugs){
+				let closedBugs = bugs.filter(bug => bug.isClosed);
+				let action = { type : 'REMOVE_ALL', payload : closedBugs};
+				return action;
 			}
 		}
 
 		function bugsReducer(currentState = [], action){
 			if (action.type === 'ADD_NEW'){
-				currentState.push(action.payload);
+				let newBug = action.payload;
+				let newState = [...currentState, newBug];
+				return newState;
+			}
+			if (action.type === 'REPLACE'){
+				let { newBug, oldBug } = action.payload;
+				let newState = currentState.map(bug => bug === oldBug ? newBug : bug);
+				return newState;
+			}
+			if (action.type === 'REMOVE_ALL'){
+				let bugsToRemove = action.payload;
+				let newState = currentState.filter(bug => bugsToRemove.indexOf(bug) === -1);
+				return newState;
 			}
 			return currentState;
 		}
@@ -72,8 +94,7 @@
 		class BugItem extends React.Component{
 
 			onBugNameClick = () => {
-				//this.props.bug.toggle();
-				
+				this.props.toggle(this.props.bug);
 			}
 			render(){
 				let { bug } = this.props;
@@ -99,10 +120,10 @@
 
 			
 			render(){
-				let { bugs } = this.props,
+				let { bugs, toggle, removeClosed } = this.props,
 					closedCount = bugs.reduce((result, bug) => bug.isClosed ? ++result : result, 0);
 				let bugItems = this.props.bugs.map((bug, index) => (
-					<BugItem key={index} bug={bug}/>
+					<BugItem key={index} bug={bug} toggle={toggle}/>
 				));
 				return(
 					<div>
@@ -129,7 +150,7 @@
 						<ol>
 							{bugItems}
 						</ol>
-						<input type="button" value="Remove Closed" />
+						<input type="button" value="Remove Closed" onClick={() => removeClosed(bugs)}/>
 					</section>
 					</div>
 				)
