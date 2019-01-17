@@ -10,8 +10,8 @@
 	<script type="text/babel">
 
 		function spinnerReducer(currentState = 0, action){
-			if (action.type === 'UP') return ++currentState;
-			if (action.type === 'DOWN') return --currentState;
+			if (action.type === 'UP') return currentState + action.payload;
+			if (action.type === 'DOWN') return currentState - action.payload;
 			if (action.type === 'DOUBLE_UP') return currentState * 2;
 			if (action.type === 'DOUBLE_DOWN') return currentState / 2;
 			return currentState;
@@ -20,12 +20,12 @@
 		let store = Redux.createStore(spinnerReducer);
 
 		let spinnerActionCreators = {
-			down(){
-				let action = { type : 'DOWN' };
+			down(delta){
+				let action = { type : 'DOWN', payload : delta };
 				return action;
 			},
-			up(){
-				let action = { type : 'UP' };
+			up(delta){
+				let action = { type : 'UP', payload : delta };
 				return action;
 			},
 			doubleUp(){
@@ -41,11 +41,14 @@
 		
 
 		class Spinner extends React.Component{
+			state : {
+				delta : 1
+			};
 			onDownClick = () => {
-				this.props.down();
+				this.props.down(this.state.delta);
 			}
 			onUpClick = () => {
-				this.props.up();
+				this.props.up(this.state.delta);
 			}
 			onDoubleUpClick = () => {
 				this.props.doubleUp();
@@ -59,6 +62,7 @@
 					<div>
 						<input type="button" value="Double Down" onClick={this.onDoubleDownClick} />
 						<input type="button" value="Down" onClick={this.onDownClick}/>
+						<input type="number" onChange={ evt => this.setState({delta : evt.target.valueAsNumber}) }/>
 						<span> [ {value} ] </span>
 						<input type="button" value="Up"  onClick={this.onUpClick}/>
 						<input type="button" value="Double Up" onClick={this.onDoubleUpClick} />
