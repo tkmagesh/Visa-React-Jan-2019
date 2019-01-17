@@ -1,4 +1,4 @@
-var stateManager = (function(){
+var SM = (function(){
 	var _currentState = undefined,
 		_subscribers = [],
 		_reducer = function(){},
