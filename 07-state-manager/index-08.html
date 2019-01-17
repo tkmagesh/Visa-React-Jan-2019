@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>State Manager</title>
+	<script src="redux.js"></script>
+	<script src="react.development.js"></script>
+	<script src="react-dom.development.js"></script>
+	<script src="babel.min.js"></script>
+	<script type="text/babel">
+
+		function spinnerReducer(currentState = 0, action){
+			if (action.type === 'UP') return ++currentState;
+			if (action.type === 'DOWN') return --currentState;
+			if (action.type === 'DOUBLE_UP') return currentState * 2;
+			if (action.type === 'DOUBLE_DOWN') return currentState / 2;
+			return currentState;
+		}
+
+		let store = Redux.createStore(spinnerReducer);
+
+		let spinnerActionCreators = {
+			down(){
+				let action = { type : 'DOWN' };
+				return action;
+			},
+			up(){
+				let action = { type : 'UP' };
+				return action;
+			},
+			doubleUp(){
+				let action = { type : 'DOUBLE_UP'};
+				return action;
+			},
+			doubleDown(){
+				let action = { type : 'DOUBLE_DOWN'};
+				return action;
+			}
+		}
+
+		
+
+		class Spinner extends React.Component{
+			onDownClick = () => {
+				this.props.down();
+			}
+			onUpClick = () => {
+				this.props.up();
+			}
+			onDoubleUpClick = () => {
+				this.props.doubleUp();
+			}
+			onDoubleDownClick = () => {
+				this.props.doubleDown();
+			}
+			render(){
+				let { value } = this.props;
+				return(
+					<div>
+						<input type="button" value="Double Down" onClick={this.onDoubleDownClick} />
+						<input type="button" value="Down" onClick={this.onDownClick}/>
+						<span> [ {value} ] </span>
+						<input type="button" value="Up"  onClick={this.onUpClick}/>
+						<input type="button" value="Double Up" onClick={this.onDoubleUpClick} />
+					</div>
+				)
+			}
+		}
+
+		let spinnerActions = Redux.bindActionCreators(spinnerActionCreators, store.dispatch);
+
+		function renderApp(){
+			let value = store.getState(),
+				dispatch = store.dispatch;
+
+			/*ReactDOM.render(<Spinner value={value} down={spinnerActions.down} up={spinnerActions.up} />,
+				document.getElementById('root'));*/
+
+			ReactDOM.render(<Spinner value={value} {...spinnerActions} />,
+				document.getElementById('root'));
+		}
+		renderApp();
+		store.subscribe(renderApp);
+	</script>
+</head>
+<body>
+	<div id="root">
+		
+	</div>
+</body>
+</html>

@@ -32,5 +32,16 @@ var SM = (function(){
 		return { getState, subscribe, dispatch };
 	}
 
-	return { createStore };
+	function bindActionCreators(actionCreators, dispatch){
+		let result = {};
+		for(let key in actionCreators){
+			result[key] = function(){
+				let action = actionCreators[key].apply(undefined, arguments);
+				dispatch(action);
+			}
+		}
+		return result;
+	}
+
+	return { createStore, bindActionCreators };
 })();
