@@ -1,0 +1,16 @@
+window.localStorage (object)
+	key/value store
+	key & value must be strings
+	key has to be unique
+	~10 MB storage limit per origin
+	Same Origin Policy
+	persistent
+
+	- setItem(key, value)
+	- getItem(key) => value
+	- removeItem(key)
+	- key(index) => key at index
+	- clear()
+	- length
+
+
