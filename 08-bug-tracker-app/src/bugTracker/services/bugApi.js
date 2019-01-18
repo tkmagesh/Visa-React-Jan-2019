@@ -1,30 +1,33 @@
+import axios from 'axios'
+const apiEndPoint = 'http://localhost:3030/bugs'
 
+let currentBugId = 0
 const storage = window.localStorage;
 
-let currentBugId = 0;
-
 function getAll(){
-	let result = [];
-	for(let index = 0, count = storage.length; index < count; index++){
-		let key = storage.key(index),
-			rawData = storage.getItem(key),
-			bug = JSON.parse(rawData);
-		currentBugId = currentBugId > bug.id ? currentBugId : bug.id;		
-		result.push(bug);
-	}
-	return result;
+	return axios
+		.get(apiEndPoint)
+		.then(response => response.data)
 }
 
-function save(bug){
-	if (bug.id === 0){
-		bug.id = ++currentBugId;
+function save(bugData){
+	if (bugData.id === 0){
+		return axios
+			.post(apiEndPoint, bugData)	
+			.then(response => response.data);
+	} else {
+		return axios
+			.put(`${apiEndPoint}/${bugData.id}`, bugData)
+			.then(response => response.data);
 	}
-	storage.setItem(bug.id.toString(), JSON.stringify(bug));
-	return bug;
+	
+	
 }
 
-function remove(bug){
-	storage.removeItem(bug.id.toString());
+function remove(bugData){
+	return axios
+		.delete(`${apiEndPoint}/${bugData.id}`)
+		.then(response => response.data);
 }
 
 let bugApi = { getAll, save, remove };

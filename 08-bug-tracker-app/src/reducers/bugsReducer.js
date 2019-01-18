@@ -5,13 +5,13 @@ function bugsReducer(currentState = [], action){
 		return newState;
 	}
 	if (action.type === 'REPLACE'){
-		let { newBug, oldBug } = action.payload;
-		let newState = currentState.map(bug => bug === oldBug ? newBug : bug);
+		let updatedBug = action.payload;
+		let newState = currentState.map(bug => bug.id === updatedBug.id ? updatedBug : bug);
 		return newState;
 	}
-	if (action.type === 'REMOVE_ALL'){
-		let bugsToRemove = action.payload;
-		let newState = currentState.filter(bug => bugsToRemove.indexOf(bug) === -1);
+	if (action.type === 'REMOVE'){
+		let bugToRemove = action.payload;
+		let newState = currentState.filter(bug => bug.id !== bugToRemove.id);
 		return newState;
 	}
 	if (action.type === 'REPLACE_ALL'){

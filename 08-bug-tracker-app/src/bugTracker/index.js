@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 
@@ -14,7 +14,7 @@ class BugTracker extends Component{
 		this.props.load();
 	}
 	render(){
-		let { bugs, toggle, removeClosed, addNew, sort, load } = this.props;			
+		let { bugs, toggle, removeClosed, addNew, sort } = this.props;			
 		return(
 			<div>
 				<BugStats bugs={bugs} />

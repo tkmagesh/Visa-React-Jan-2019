@@ -1,8 +1,15 @@
 import bugApi from '../services/bugApi';
 
 export function load(){
-	let bugs = bugApi.getAll();
-	let action = { type : 'REPLACE_ALL', payload : bugs};
-	return action;
+	return function(dispatch){
+		bugApi
+			.getAll()
+			.then(bugs => {
+				let action = { type : 'REPLACE_ALL', payload : bugs};
+				dispatch(action);	
+			})
+			
+	};
+	
 }
 
