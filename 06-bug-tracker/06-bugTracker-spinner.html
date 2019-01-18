@@ -85,13 +85,8 @@
 				let action = { type : 'REMOVE_ALL', payload : closedBugs};
 				return action;
 			},
-			sort(bugs, attrName, isDescending = false){
-				console.log(arguments);
-				let comparer = getComparerFor(attrName);
-				if (isDescending)
-					comparer = getDescendingComparerFor(comparer)
-				let sortedBugs = [...bugs.sort(comparer)];
-				let action = { type : 'REPLACE_ALL', payload : sortedBugs};
+			sort(attrName, isDescending = false){
+				let action = { type : 'SET_SORT', payload : {attrName, isDescending}};
 				return action;
 			}
 		}
@@ -116,24 +111,32 @@
 		}
 
 		//reducers
-		function bugsReducer(currentState = [], action){
+		let initialBugState = {
+			bugs : [],
+			attrName : 'name',
+			isDescending : false
+		};
+
+		function bugsReducer(currentState = initialBugState, action){
 			if (action.type === 'ADD_NEW'){
 				let newBug = action.payload;
-				let newState = [...currentState, newBug];
+				let newState = {...currentState,  bugs : [...currentState.bugs, newBug] };
 				return newState;
 			}
 			if (action.type === 'REPLACE'){
 				let { newBug, oldBug } = action.payload;
-				let newState = currentState.map(bug => bug === oldBug ? newBug : bug);
+				let newState = { ...currentState, bugs : currentState.bugs.map(bug => bug === oldBug ? newBug : bug) };
 				return newState;
 			}
 			if (action.type === 'REMOVE_ALL'){
 				let bugsToRemove = action.payload;
-				let newState = currentState.filter(bug => bugsToRemove.indexOf(bug) === -1);
+				let newState = {...currentState, bugs : currentState.bugs.filter(bug => bugsToRemove.indexOf(bug) === -1) };
 				return newState;
 			}
-			if (action.type === 'REPLACE_ALL'){
-				return action.payload;
+			if (action.type === 'SET_SORT'){
+				let { attrName, isDescending} = action.payload;
+				let newState = { ...currentState, attrName : attrName, isDescending : isDescending};
+				return newState;
 			}
 			return currentState;
 		}
@@ -186,7 +189,7 @@
 
 			onSortChange = () => {
 				let { bugs, sort } = this.props;
-				sort(bugs, this.selectAttrNameRef.current.value, this.chkIsDescending.current.checked);
+				sort(this.selectAttrNameRef.current.value, this.chkIsDescending.current.checked);
 			}
 			render(){
 				
@@ -328,7 +331,16 @@
 		})();*/}
 
 		let ConnectedBugTracker = ReactRedux.connect(
-				({bugsData}) => ({bugs : bugsData}),
+				({bugsData}) => {
+					let { bugs, attrName, isDescending } = bugsData;
+					let comparer = getComparerFor(attrName);
+					if (isDescending) {
+						comparer = getDescendingComparerFor(comparer);
+					};
+					let sortedBugs = bugs.sort(comparer);
+					console.table(sortedBugs);
+					return { bugs : sortedBugs };
+				},
 				dispatch => Redux.bindActionCreators(bugActionCreators, dispatch)
 			)(BugTracker);
 
