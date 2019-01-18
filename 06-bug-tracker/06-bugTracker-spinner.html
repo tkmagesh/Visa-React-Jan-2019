@@ -69,9 +69,10 @@
 		}
 		//actionCreators
 		//core application logic
+		let currentBugId = 0;
 		let bugActionCreators = {
 			addNew(bugName){
-				let newBug = { name : bugName, isClosed : false};
+				let newBug = { id : ++currentBugId, name : bugName, isClosed : false};
 				let action = { type : 'ADD_NEW', payload : newBug};
 				return action;
 			},
@@ -136,6 +137,7 @@
 			if (action.type === 'SET_SORT'){
 				let { attrName, isDescending} = action.payload;
 				let newState = { ...currentState, attrName : attrName, isDescending : isDescending};
+				console.log(newState);
 				return newState;
 			}
 			return currentState;
@@ -151,12 +153,13 @@
 
 		//UI Components
 
-		class BugItem extends React.Component{
+		class BugItem extends React.PureComponent{
 
 			onBugNameClick = () => {
 				this.props.toggle(this.props.bug);
 			}
 			render(){
+
 				let { bug } = this.props;
 				let bugStyle = 'bugname ' + (bug.isClosed ? 'closed' : '');
 				return(
@@ -230,7 +233,7 @@
 			render(){
 				let { bugs, toggle, removeClosed } = this.props;
 				let bugItems = bugs.map((bug, index) => (
-					<BugItem key={index} bug={bug} toggle={toggle}/>
+					<BugItem key={bug.id} bug={bug} toggle={toggle}/>
 				));
 				return(
 					<section className="list">
@@ -337,9 +340,8 @@
 					if (isDescending) {
 						comparer = getDescendingComparerFor(comparer);
 					};
-					let sortedBugs = bugs.sort(comparer);
-					console.table(sortedBugs);
-					return { bugs : sortedBugs };
+					bugs.sort(comparer);
+					return { bugs : bugs };
 				},
 				dispatch => Redux.bindActionCreators(bugActionCreators, dispatch)
 			)(BugTracker);
